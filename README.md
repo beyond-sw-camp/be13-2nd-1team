@@ -1,1 +1,1 @@
-# be13-2nd-1team
+# be13-2nd-Maptist-MapPride
