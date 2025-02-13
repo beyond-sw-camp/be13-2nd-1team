@@ -30,14 +30,21 @@ public class Member {
     @JoinColumn(name = "grade_id")
     private Grade grade;
 
+    @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false, unique = true)
     private String nickname;
 
+    @Column(nullable = false)
     private LocalDate birthDay;
 
+    @Column(nullable = false)
     private String userRole;
+
+
 
 }

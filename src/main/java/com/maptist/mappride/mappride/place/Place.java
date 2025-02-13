@@ -25,18 +25,25 @@ public class Place {
     @JoinColumn(name = "category_id")
     private Category category;
 
+    @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
     private Double latitude;
 
+    @Column(nullable = false)
     private Double longitude;
 
+    @Column(nullable = false)
     private String address;
 
+    @Column(nullable = false)
     private String color;
 
+    @Column(nullable = false)
     private String content;
 
+    @Column(nullable = false)
     private LocalDateTime reg_date;
 
 }
