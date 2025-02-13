@@ -28,5 +28,6 @@ public class Photo {
     @JoinColumn(name = "place_id")
     private Place place;
 
+    @Column(nullable = false)
     private String photoUrl;
 }

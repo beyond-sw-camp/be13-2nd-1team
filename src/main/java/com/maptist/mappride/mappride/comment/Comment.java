@@ -30,6 +30,10 @@ public class Comment {
     @JoinColumn(name = "place_id")
     private Place place;
 
+    @Column(nullable = false)
+    private String comment;
+
+    @Column(nullable = false)
     private LocalDateTime regDate;
 
 }
