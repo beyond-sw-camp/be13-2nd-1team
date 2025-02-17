@@ -1,27 +1,46 @@
 package com.maptist.mappride.mappride.config.jwt.token;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.maptist.mappride.mappride.config.jwt.DTO.StatusResponseDto;
 import com.maptist.mappride.mappride.config.jwt.DTO.TokenResponseStatus;
 import com.maptist.mappride.mappride.config.jwt.JwtUtil;
+import com.maptist.mappride.mappride.member.DTO.RegisterDto;
+import com.maptist.mappride.mappride.member.MemberSerivce;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.Optional;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/auth")
 public class AuthController {
 
     private final RefreshTokenRepository tokenRepository;
     private final RefreshTokenService tokenService;
+    private final MemberSerivce memberSerivce;
     private final JwtUtil jwtUtil;
+    private final ObjectMapper objectMapper;
 
-    @PostMapping("token/logout")
+    @PostMapping("/logout")
     public ResponseEntity<StatusResponseDto> logout(@RequestHeader("Authorization") final String accessToken) {
 
         // 엑세스 토큰으로 현재 Redis 정보 삭제
@@ -29,26 +48,58 @@ public class AuthController {
         return ResponseEntity.ok(StatusResponseDto.addStatus(200));
     }
 
-    @PostMapping("/token/refresh")
+    @PostMapping("/refresh")
     public ResponseEntity<TokenResponseStatus> refresh(@RequestHeader("Authorization") final String accessToken) {
 
-        // 액세스 토큰으로 Refresh 토큰 객체를 조회
-        Optional<RefreshToken> refreshToken = tokenRepository.findByAccessToken(accessToken);
-
-        // RefreshToken이 존재하고 유효하다면 실행
-        if (refreshToken.isPresent() && jwtUtil.verifyToken(refreshToken.get().getRefreshToken())) {
-            // RefreshToken 객체를 꺼내온다.
-            RefreshToken resultToken = refreshToken.get();
-            // 권한과 아이디를 추출해 새로운 액세스토큰을 만든다.
-            String newAccessToken = jwtUtil.generateAccessToken(resultToken.getId(), jwtUtil.getRole(resultToken.getRefreshToken()));
-            // 액세스 토큰의 값을 수정해준다.
-            resultToken.updateAccessToken(newAccessToken);
-            tokenRepository.save(resultToken);
-            // 새로운 액세스 토큰을 반환해준다.
+        String newAccessToken = tokenService.republishAccessToken(accessToken);
+        System.out.println(newAccessToken);
+        if (StringUtils.hasText(newAccessToken)) {
             return ResponseEntity.ok(TokenResponseStatus.addStatus(200, newAccessToken));
         }
 
         return ResponseEntity.badRequest().body(TokenResponseStatus.addStatus(400, null));
+    }
+
+    @GetMapping("/loginSuccess")
+    public ResponseEntity<String> login(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        // 소셜로그인 후 그 유저에 대한 회원 정보가 있으면 토큰 발급 후 여기로 리디렉션됌.
+        String decodedCookie = decodeCookie(request, response);
+
+        return ResponseEntity.ok().body(decodedCookie);
+    }
+
+    @GetMapping("/register")
+    public ResponseEntity<Long> register(@RequestParam("loginUser") String registerDtoJson) throws Exception {
+        // 소셜로그인 성공 시 그 유저에 대한 회원 정보가 DB에 존재하지 않을 때, 회원가입 진행
+        RegisterDto registerDto = objectMapper.readValue(registerDtoJson, RegisterDto.class);
+        return memberSerivce.register(registerDto);
+    }
+
+    @PostMapping("/sendError")
+    public ResponseEntity<String> loginFailure(@RequestParam("message") String message){
+        return ResponseEntity.badRequest().body(message);
+    }
+
+    private String decodeCookie(HttpServletRequest request, HttpServletResponse response) {
+        String decodedToken = null;
+        String encodedToken = Arrays.stream(request.getCookies())
+                .filter(c -> c.getName().equals("Authorization"))
+                .findFirst()
+                .map(Cookie::getValue)
+                .orElse(null);
+
+        if (encodedToken != null) {
+            decodedToken = new String(Base64.getUrlDecoder().decode(encodedToken));
+            System.out.println(decodedToken); // "Bearer (token)" 형태 복원됨
+
+            Cookie cookie = new Cookie("Authorization", null); // 또는 setValue("")
+            cookie.setMaxAge(0); // 즉시 만료
+            cookie.setPath("/"); // 같은 경로 설정 필수
+            cookie.setHttpOnly(true);
+            cookie.setSecure(true);
+            response.addCookie(cookie);
+        }
+        return decodedToken;
     }
 
 }

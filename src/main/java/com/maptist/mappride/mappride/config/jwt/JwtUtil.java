@@ -1,6 +1,9 @@
 package com.maptist.mappride.mappride.config.jwt;
 
 import com.maptist.mappride.mappride.config.jwt.DTO.GeneratedToken;
+import com.maptist.mappride.mappride.config.jwt.token.AccessTokenService;
+import com.maptist.mappride.mappride.config.jwt.token.RefreshToken;
+import com.maptist.mappride.mappride.config.jwt.token.RefreshTokenRepository;
 import com.maptist.mappride.mappride.config.jwt.token.RefreshTokenService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -13,13 +16,15 @@ import org.springframework.stereotype.Service;
 
 import java.util.Base64;
 import java.util.Date;
+import java.util.Optional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class JwtUtil {
     private final JwtProperties jwtProperties;
-    private final RefreshTokenService tokenService;
+    private final AccessTokenService tokenService;
+    private final RefreshTokenRepository refreshTokenRepository;
     private String secretKey;
 
 
@@ -36,6 +41,7 @@ public class JwtUtil {
 
         // 토큰을 Redis에 저장한다.
         tokenService.saveTokenInfo(email, refreshToken, accessToken);
+
         return new GeneratedToken(accessToken, refreshToken);
     }
 
@@ -64,7 +70,11 @@ public class JwtUtil {
 
 
     public String generateAccessToken(String email, String role) {
-        long tokenPeriod = 1000L * 60L * 30L; // 30분
+        //long tokenPeriod = 1000L * 60L * 30L; // 30분
+        long tokenPeriod = 1000L * 60L * 60L * 24L * 60L;  // 60일
+        //long tokenPeriod = 1000L * 10L; // 10초
+
+
         Claims claims = Jwts.claims().setSubject(email);
         claims.put("role", role);
 
@@ -85,8 +95,7 @@ public class JwtUtil {
 
 
     public boolean verifyToken(String token) {
-        try {
-            Jws<Claims> claims = Jwts.parser()
+           try{ Jws<Claims> claims = Jwts.parser()
                     .setSigningKey(secretKey) // 비밀키를 설정하여 파싱한다.
                     .parseClaimsJws(token);  // 주어진 토큰을 파싱하여 Claims 객체를 얻는다.
             // 토큰의 만료 시간과 현재 시간비교
@@ -96,6 +105,17 @@ public class JwtUtil {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public boolean isExpired(String token){ // access Token가 있는지 확인
+        // Redis에서 토큰을 찾는다
+            Optional<RefreshToken> refreshTokenOptional = refreshTokenRepository.findByAccessToken(token);
+
+            // 토큰이 Redis에 존재하지 않으면 유효하지 않은 토큰
+            if (!refreshTokenOptional.isPresent()) {
+                return true;
+            }
+            return false;
     }
 
 
