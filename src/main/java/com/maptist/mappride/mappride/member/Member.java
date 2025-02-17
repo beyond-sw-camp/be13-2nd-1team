@@ -1,6 +1,7 @@
 package com.maptist.mappride.mappride.member;
 
 import com.maptist.mappride.mappride.grade.Grade;
+import com.maptist.mappride.mappride.member.DTO.RegisterDto;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -18,7 +20,7 @@ import java.time.LocalDate;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString
 public class Member {
 
@@ -36,15 +38,26 @@ public class Member {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String nickname;
 
-    @Column(nullable = false)
     private LocalDate birthDay;
 
     @Column(nullable = false)
     private String userRole;
 
+    private Member(String email, String name, String userRole){
+        this.email = email;
+        this.name = name;
+        this.userRole = userRole;
+    }
 
+    public static Member createMember(RegisterDto registerDto){
+        Member member = new Member(
+                registerDto.getEmail(),
+                registerDto.getName(),
+                registerDto.getUserRole());
 
+        return member;
+    }
 }

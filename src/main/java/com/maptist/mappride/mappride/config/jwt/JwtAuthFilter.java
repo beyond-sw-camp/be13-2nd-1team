@@ -32,7 +32,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        return request.getRequestURI().contains("token/");
+
+//        return request.getRequestURI().contains("/");
+        return request.getRequestURI().contains("/auth") ||
+               request.getRequestURI().contains("/login") ;
     }
 
     @Override
@@ -40,14 +43,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         // request Header에서 AccessToken을 가져온다.
         String atc = request.getHeader("Authorization");
 
-        // 토큰 검사 생략(모두 허용 URL의 경우 토큰 검사 통과)
-        if (!StringUtils.hasText(atc)) {
-            doFilter(request, response, filterChain);
-            return;
+        if(atc == null){
+            throw new JwtException("Authorization header is required");
         }
 
+        atc = atc.split(" ")[1];
+
+//        if (!StringUtils.hasText(atc)) {
+//            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization header is required");
+//            return;
+//        }
+
+
+
         // AccessToken을 검증하고, 만료되었을경우 예외를 발생시킨다.
-        if (!jwtUtil.verifyToken(atc)) {
+        if (!jwtUtil.verifyToken(atc) || jwtUtil.isExpired(atc)) {
             throw new JwtException("Access Token 만료!");
         }
 
@@ -57,6 +67,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             // AccessToken 내부의 payload에 있는 email로 user를 조회한다. 없다면 예외를 발생시킨다 -> 정상 케이스가 아님
             Member findMember = memberRepository.findByEmail(jwtUtil.getUid(atc))
                     .orElseThrow(IllegalStateException::new);
+
+            System.out.println("findMember = " + findMember);
 
             // SecurityContext에 등록할 User 객체를 만들어준다.
             SecurityUserDto userDto = SecurityUserDto.builder()

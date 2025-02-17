@@ -1,6 +1,8 @@
 package com.maptist.mappride.mappride.member;
 
+import com.maptist.mappride.mappride.member.DTO.RegisterDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,4 +19,9 @@ public class MemberSerivce {
         return memberRepository.findByEmail(email);
     }
 
+    public ResponseEntity<Long> register(RegisterDto registerDto) {
+        Member member = Member.createMember(registerDto);
+
+        return ResponseEntity.ok().body(memberRepository.save(member));
+    }
 }

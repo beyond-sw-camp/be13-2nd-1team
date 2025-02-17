@@ -16,7 +16,6 @@ public class OAuth2Attribute {
     private String attributeKey; // 사용자 속성의 키 값
     private String email; // 이메일 정보
     private String name; // 이름 정보
-    private String picture; // 프로필 사진 정보
     private String provider; // 제공자 정보
 
     // 서비스에 따라 OAuth2Attribute 객체를 생성하는 메서드
@@ -39,8 +38,10 @@ public class OAuth2Attribute {
     * */
     private static OAuth2Attribute ofGoogle(String provider, String attributeKey,
                                             Map<String, Object> attributes) {
+
         return OAuth2Attribute.builder()
                 .email((String) attributes.get("email"))
+                .name((String) attributes.get("name"))
                 .provider(provider)
                 .attributes(attributes)
                 .attributeKey(attributeKey)
@@ -58,6 +59,7 @@ public class OAuth2Attribute {
 
         return OAuth2Attribute.builder()
                 .email((String) kakaoAccount.get("email"))
+                .name((String) kakaoProfile.get("nickname"))
                 .provider(provider)
                 .attributes(kakaoAccount)
                 .attributeKey(attributeKey)
@@ -74,6 +76,7 @@ public class OAuth2Attribute {
 
         return OAuth2Attribute.builder()
                 .email((String) response.get("email"))
+                .name((String) response.get("name"))
                 .attributes(response)
                 .provider(provider)
                 .attributeKey(attributeKey)
@@ -87,6 +90,7 @@ public class OAuth2Attribute {
         map.put("id", attributeKey);
         map.put("key", attributeKey);
         map.put("email", email);
+        map.put("name", name);
         map.put("provider", provider);
 
         return map;

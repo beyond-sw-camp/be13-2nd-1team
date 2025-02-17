@@ -1,5 +1,6 @@
 package com.maptist.mappride.mappride.config.oauth2;
 
+import com.maptist.mappride.mappride.member.DTO.RegisterDto;
 import com.maptist.mappride.mappride.member.Member;
 import com.maptist.mappride.mappride.member.MemberSerivce;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         // 사용자 email(또는 id) 정보를 가져온다.
         String email = (String) memberAttribute.get("email");
+
         // 이메일로 가입된 회원인지 조회한다.
         Optional<Member> findMember = memberService.findByEmail(email);
 
@@ -57,7 +59,6 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                     Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")),
                     memberAttribute, "email");
         }
-
         // 회원이 존재할경우, memberAttribute의 exist 값을 true로 넣어준다.
         memberAttribute.put("exist", true);
         // 회원의 권한과, 회원속성, 속성이름을 이용해 DefaultOAuth2User 객체를 생성해 반환한다.

@@ -40,7 +40,8 @@ public class SecurityConfig {
                 .sessionManagement((policy) -> policy
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/token/**").permitAll()
+                        //.requestMatchers("/**").permitAll() //모든 경로 인증 불필요
+                        .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/", "/css/**", "/images/**", "/js/**", "/favicon.ico").permitAll()
                         .requestMatchers("/mypage/**").hasAnyRole("USER", "MANAGER")
                         .anyRequest().authenticated()
