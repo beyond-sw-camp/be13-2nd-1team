@@ -33,28 +33,29 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .httpBasic(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable) //HTTP 기본 인증 비활성화
                 .cors((cors) -> cors
-                        .configurationSource(myWebsiteConfigurationSource()))
-                .csrf(AbstractHttpConfigurer::disable)
+                        .configurationSource(myWebsiteConfigurationSource())) //CORS 활성화
+                .csrf(AbstractHttpConfigurer::disable) //CSRF 보호 기능 비활성화
                 .sessionManagement((policy) -> policy
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(authorize -> authorize
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //세션관리 정책을 STATELESS 로 설정
+                .authorizeHttpRequests(authorize -> authorize // 요청에 대한 인증 설정
                         //.requestMatchers("/**").permitAll() //모든 경로 인증 불필요
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/auth/**").permitAll() //여기 적혀있는 경로는 모두 허용
                         .requestMatchers("/", "/css/**", "/images/**", "/js/**", "/favicon.ico").permitAll()
-                        .requestMatchers("/mypage/**").hasAnyRole("USER", "MANAGER")
-                        .anyRequest().authenticated()
+                        .requestMatchers("/mypage/**").hasAnyRole("USER", "MANAGER") // USER와 MANAGER는 허용
+                        .anyRequest().authenticated() // 그 외 요청은 모두 인증이 필요하다.
                 )
-                .oauth2Login(oauth2 -> oauth2
-                        .failureHandler(oAuth2LoginFailureHandler)
-                        .successHandler(oAuth2LoginSuccessHandler)
+                .oauth2Login(oauth2 -> oauth2 // OAuth2 로그인 설정 시작
+                        .failureHandler(oAuth2LoginFailureHandler) // 로그인 실패시 처리할 핸들러 지정
+                        .successHandler(oAuth2LoginSuccessHandler) // 로그인 성공시 처리할 핸들러 지정
                                 .userInfoEndpoint(endPoint -> endPoint
-                                        .userService(customOAuth2UserService))
+                                        .userService(customOAuth2UserService)) // OAuth2 로그인시 사용자 정보를 가져오는 엔드포인트와 사용자 서비스를 설정
                 );
 
+        // JWT 인증 필터를 UsernamePasswordAuthenticationFilter 앞에 추가한다.
         return http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(jwtExceptionFilter, JwtAuthFilter.class)
+                .addFilterBefore(jwtExceptionFilter, JwtAuthFilter.class) // jwtExceptionFilter를 JwtAuthFilter앞에 추가한다.
                 .build();
     }
 
