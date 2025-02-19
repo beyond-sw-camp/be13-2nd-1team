@@ -71,7 +71,7 @@ public class MyAuthenticationSuccessHandler extends SimpleUrlAuthenticationSucce
 
 
         } else {
-            RegisterDto registerDto = new RegisterDto(email, name, name);
+            RegisterDto registerDto = new RegisterDto(email, name);
 
             ObjectMapper objectMapper = new ObjectMapper();
             String registerDtoJson = objectMapper.writeValueAsString(registerDto);
