@@ -1,8 +1,7 @@
 package com.maptist.mappride.mappride.config.oauth2;
 
-import com.maptist.mappride.mappride.member.DTO.RegisterDto;
 import com.maptist.mappride.mappride.member.Member;
-import com.maptist.mappride.mappride.member.MemberSerivce;
+import com.maptist.mappride.mappride.member.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -23,7 +22,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
-    private final MemberSerivce memberService;
+    private final MemberService memberService;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {

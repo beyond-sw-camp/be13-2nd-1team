@@ -5,20 +5,16 @@ import com.maptist.mappride.mappride.config.jwt.DTO.StatusResponseDto;
 import com.maptist.mappride.mappride.config.jwt.DTO.TokenResponseStatus;
 import com.maptist.mappride.mappride.config.jwt.JwtUtil;
 import com.maptist.mappride.mappride.member.DTO.RegisterDto;
-import com.maptist.mappride.mappride.member.MemberSerivce;
+import com.maptist.mappride.mappride.member.MemberService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -36,7 +31,7 @@ public class AuthController {
 
     private final RefreshTokenRepository tokenRepository;
     private final RefreshTokenService tokenService;
-    private final MemberSerivce memberSerivce;
+    private final MemberService memberSerivce;
     private final JwtUtil jwtUtil;
     private final ObjectMapper objectMapper;
 

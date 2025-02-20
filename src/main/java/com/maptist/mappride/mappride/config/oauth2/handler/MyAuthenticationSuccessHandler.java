@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.maptist.mappride.mappride.config.jwt.DTO.GeneratedToken;
 import com.maptist.mappride.mappride.config.jwt.JwtUtil;
 import com.maptist.mappride.mappride.member.DTO.RegisterDto;
-import com.maptist.mappride.mappride.member.MemberSerivce;
+import com.maptist.mappride.mappride.member.MemberService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,11 +18,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Base64;
-import java.util.UUID;
 
 @Slf4j
 @Component
@@ -30,7 +27,7 @@ import java.util.UUID;
 public class MyAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JwtUtil jwtUtil;
-    private final MemberSerivce memberSerivce;
+    private final MemberService memberSerivce;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
