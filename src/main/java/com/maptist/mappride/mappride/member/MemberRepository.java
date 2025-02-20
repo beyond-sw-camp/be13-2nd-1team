@@ -29,4 +29,5 @@ public class MemberRepository {
         em.persist(member);
         return member.getId();
     }
+
 }
