@@ -22,23 +22,20 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequiredArgsConstructor(onConstructor_ = {@Autowired})
+@RequiredArgsConstructor
 @RequestMapping("/categories")
 public class CategoryController {
 
-    @Autowired
-    private CategoryService categoryService;
+    private final CategoryService categoryService;
 
-    @Autowired
-    private PlaceService placeService;
+    private final PlaceService placeService;
 
 
     // 카테고리 생성
     // 데이터 유효성 검증완료전까진 dto로 감싸서 전달함
     @PostMapping
-    public ResponseEntity<Long> createCategory(@RequestParam("name") String name,
-                                               @RequestParam("isPublic") boolean isPublic) {
-        return categoryService.createCategory(name,isPublic);
+    public ResponseEntity<Long> createCategory(@RequestBody CategoryDto dto) {
+        return categoryService.createCategory(dto);
     }
 
 

@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,9 +30,8 @@ public class CategoryService {
 
     // 카테고리 생성
     // 유효성 검사라서 비즈니스 로직임 CategoryController에서 왔음
-    public ResponseEntity<Long> createCategory(String name, boolean isPublic) {
-        // RequestParam을 통해 컨트롤러에서 가져온 카테고리 이름과 공유허용여부를 dto로 감쌈
-        CategoryDto categoryDto = new CategoryDto(name, isPublic);
+    public ResponseEntity<Long> createCategory(@RequestBody CategoryDto categoryDto) {
+        // RequestParam 대신 RequestBody씀
 
         try{ // 중복된 이름의 카테고리가 있는지 검사
             validateDuplicateCategory(categoryDto.getName());
